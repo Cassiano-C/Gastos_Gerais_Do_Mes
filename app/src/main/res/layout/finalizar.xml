@@ -1,0 +1,47 @@
+<!-- res/layout/preview_planilha.xml -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Telas.Finalizar">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:text="Tabela de Gastos"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"/>
+
+        <TableLayout
+            android:id="@+id/tabela"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:stretchColumns="*"
+            android:paddingTop="16dp"
+            android:background="#DDD">
+
+            <TableRow>
+                <TextView android:text="Estabelecimento" style="@style/Cabecalho"/>
+                <TextView android:text="Funcionalidades" style="@style/Cabecalho"/>
+                <TextView android:text="Valor" style="@style/Cabecalho"/>
+            </TableRow>
+            <!-- Linhas serão preenchidas dinamicamente -->
+        </TableLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/sobraMes"
+            android:text="Sobra do mês: R$ 0,00"
+            android:textStyle="bold"
+            android:layout_marginTop="24dp"/>
+    </LinearLayout>
+</ScrollView>

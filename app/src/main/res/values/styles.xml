@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- res/values/styles.xml -->
+    <style name="Cabecalho">
+        <item name="android:padding">8dp</item>
+        <item name="android:textColor">#000</item>
+        <item name="android:background">#AAA</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+</resources>

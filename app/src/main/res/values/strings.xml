@@ -1,11 +1,31 @@
 <resources>
-    <string name="app_name">GastosGeraisDoMes</string>
+    <string name="app_name">Gastos Gerais Do Mes</string>
     <string name="action_settings">Settings</string>
     <!-- Strings used for fragments for navigation -->
-    <string name="first_fragment_label">First Fragment</string>
-    <string name="second_fragment_label">Second Fragment</string>
-    <string name="next">Next</string>
-    <string name="previous">Previous</string>
+    <string name="inicio">Inicio</string>
+    <string name="listaItens">Lista Dos Gastos</string>
+    <string name="iten">Iten da Lista</string>
+    <string name="histotico">Historico das Listas</string>
+    <string name="cria_iten">Cria novo Iten</string>
+    <string name="cria">Cria uma Nova Lista</string>
+
+
+    <string name="busca">Busca Estabelecimento</string>
+    <string name="estab">Estabelimento</string>
+    <string name="func">Funcionalidade</string>
+    <string name="valor">Valor</string>
+    <string name="salvar">Salvar</string>
+    <string name="titulo">Tabela de Gastos</string>
+
+
+    <string name="bnt_lista">Lista</string>
+    <string name="bnt_gera">Finalizar Gastos</string>
+    <string name="bnt_hitorico">Historico</string>
+    <string name="bnt_cria">Cirar Nova Lista</string>
+    <string name="bnt_busca">Busca</string>
+    <string name="bnt_atualiza">Atualizar</string>
+    <string name="bnt_criar">Criar</string>
+    <string name="bnt_excluir">Excluir Iten</string>
 
     <string name="lorem_ipsum">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in scelerisque sem. Mauris

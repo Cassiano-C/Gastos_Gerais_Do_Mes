@@ -3,26 +3,91 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/FirstFragment">
+    app:startDestination="@id/inicio">
 
     <fragment
-        android:id="@+id/FirstFragment"
-        android:name="com.example.gastosgeraisdomes.Telas.FirstFragment"
-        android:label="@string/first_fragment_label"
-        tools:layout="@layout/fragment_first">
+        android:id="@+id/inicio"
+        android:name="com.example.gastosgeraisdomes.Telas.Inicio"
+        android:label="@string/inicio"
+        tools:layout="@layout/inicio">
 
         <action
-            android:id="@+id/action_FirstFragment_to_SecondFragment"
-            app:destination="@id/SecondFragment" />
+            android:id="@+id/action_inicio_to_lista"
+            app:destination="@id/listaItens" />
+        <action
+            android:id="@+id/action_inicio_to_criaIten"
+            app:destination="@id/criaIten" />
+        <action
+            android:id="@+id/action_inicio_to_cria2"
+            app:destination="@id/cria" />
+        <action
+            android:id="@+id/action_inicio_to_historico2"
+            app:destination="@id/historico" />
+        <action
+            android:id="@+id/action_inicio_to_finalizar"
+            app:destination="@id/finalizar" />
     </fragment>
     <fragment
-        android:id="@+id/SecondFragment"
-        android:name="com.example.gastosgeraisdomes.Telas.SecondFragment"
-        android:label="@string/second_fragment_label"
-        tools:layout="@layout/fragment_second">
+        android:id="@+id/listaItens"
+        android:name="com.example.gastosgeraisdomes.Telas.Lista"
+        android:label="@string/listaItens"
+        tools:layout="@layout/lista">
 
         <action
-            android:id="@+id/action_SecondFragment_to_FirstFragment"
-            app:destination="@id/FirstFragment" />
+            android:id="@+id/action_lista_to_inicio"
+            app:destination="@id/inicio" />
+        <action
+            android:id="@+id/action_lista_to_iten2"
+            app:destination="@id/iten" />
+    </fragment>
+    <fragment
+        android:id="@+id/cria"
+        android:name="com.example.gastosgeraisdomes.Telas.Cria"
+        android:label="@string/cria"
+        tools:layout="@layout/cria" >
+        <action
+            android:id="@+id/action_cria2_to_inicio"
+            app:destination="@id/inicio" />
+    </fragment>
+    <fragment
+        android:id="@+id/criaIten"
+        android:name="com.example.gastosgeraisdomes.Telas.CriaIten"
+        android:label="@string/cria_iten"
+        tools:layout="@layout/cria_iten" >
+        <action
+            android:id="@+id/action_criaIten_to_inicio"
+            app:destination="@id/inicio" />
+        <action
+            android:id="@+id/action_criaIten_to_iten2"
+            app:destination="@id/iten" />
+    </fragment>
+    <fragment
+        android:id="@+id/historico"
+        android:name="com.example.gastosgeraisdomes.Telas.Historico"
+        android:label="@string/histotico"
+        tools:layout="@layout/historico" >
+        <action
+            android:id="@+id/action_historico2_to_inicio"
+            app:destination="@id/inicio" />
+    </fragment>
+    <fragment
+        android:id="@+id/iten"
+        android:name="com.example.gastosgeraisdomes.Telas.Iten"
+        android:label="@string/iten"
+        tools:layout="@layout/iten" >
+        <action
+            android:id="@+id/action_iten2_to_lista"
+            app:destination="@id/listaItens" />
+        <action
+            android:id="@+id/action_iten2_to_criaIten"
+            app:destination="@id/criaIten" />
+    </fragment>
+    <fragment
+        android:id="@+id/finalizar"
+        android:name="com.example.gastosgeraisdomes.Telas.Finalizar"
+        android:label="Finalizar" >
+        <action
+            android:id="@+id/action_finalizar_to_inicio"
+            app:destination="@id/inicio" />
     </fragment>
 </navigation>

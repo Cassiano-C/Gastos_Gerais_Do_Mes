@@ -7,14 +7,12 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.fragment.NavHostFragment;
 
-import com.example.gastosgeraisdomes.R;
-import com.example.gastosgeraisdomes.databinding.FragmentSecondBinding;
+import com.example.gastosgeraisdomes.databinding.HistoricoBinding;
 
-public class SecondFragment extends Fragment {
+public class Historico   extends Fragment {
 
-    private FragmentSecondBinding binding;
+    private HistoricoBinding binding;
 
     @Override
     public View onCreateView(
@@ -22,7 +20,7 @@ public class SecondFragment extends Fragment {
             Bundle savedInstanceState
     ) {
 
-        binding = FragmentSecondBinding.inflate(inflater, container, false);
+        binding = HistoricoBinding.inflate(inflater, container, false);
         return binding.getRoot();
 
     }
@@ -30,10 +28,6 @@ public class SecondFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        binding.buttonSecond.setOnClickListener(v ->
-                NavHostFragment.findNavController(SecondFragment.this)
-                        .navigate(R.id.action_SecondFragment_to_FirstFragment)
-        );
     }
 
     @Override
