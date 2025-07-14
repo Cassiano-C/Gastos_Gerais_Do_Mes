@@ -45,8 +45,8 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
-    implementation(libs.poi.on.android)
 
+    implementation("com.google.code.gson:gson:2.10.1")
 
     implementation("androidx.room:room-runtime:$room_version")
     annotationProcessor("androidx.room:room-compiler:$room_version")
@@ -65,7 +65,5 @@ dependencies {
 
     // optional - Paging 3 Integration
     implementation("androidx.room:room-paging:2.7.2")
-
-    implementation("org.apache.poi:poi-ooxml:3.17")
 
 }

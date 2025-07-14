@@ -15,6 +15,15 @@ public interface ItenListaDao {
     @Query("SELECT * FROM iten")
     List<ItenLista> getALL();
 
+    @Query("SELECT estabelecimento FROM iten")
+    List<String> getALLEsta();
+
+    @Query("SELECT funcao FROM iten")
+    List<String> getALLFunc();
+
+    @Query("SELECT valor FROM iten")
+    List<Float> getALLVAalor();
+
     @Query("SELECT * FROM iten WHERE estabelecimento = :estab")
     List<ItenLista> BuscasEstab(String estab);
     @Query("SELECT EXISTS(SELECT 1 FROM iten WHERE estabelecimento = :estab)")
@@ -34,4 +43,7 @@ public interface ItenListaDao {
 
     @Delete
     void delete(ItenLista itenListas);
+
+    @Query("DELETE FROM iten")
+    void deletarTodos();
 }

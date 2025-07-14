@@ -33,4 +33,6 @@ public interface ListaDao {
 
     @Delete
     void delete(ListaItens listaItens);
+    @Query("DELETE FROM lista_itens")
+    void deletarTodos();
 }
