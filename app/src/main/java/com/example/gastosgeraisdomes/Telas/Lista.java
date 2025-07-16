@@ -63,7 +63,6 @@ public class Lista extends Fragment {
         if(arg != null){
             itenListaLista = new ArrayList<>();
             i = arg.getInt("idArq");
-            Toast.makeText(requireContext(), "qual arquivo" + i, Toast.LENGTH_SHORT).show();
             File dir = new File(requireContext().getFilesDir(), "backups");
             File[] arquivos = dir.listFiles(new FilenameFilter() {
                 @Override
@@ -155,7 +154,7 @@ public class Lista extends Fragment {
 
     }
 
-    private void mostrarDialogoDeConfirmacao(List<ItenLista> listas, List<ListaItens> listaItens) {
+    /*private void mostrarDialogoDeConfirmacao(List<ItenLista> listas, List<ListaItens> listaItens) {
         new AlertDialog.Builder(requireContext())
                 .setTitle("Gerar o PDF da Lista")
                 .setMessage("Deseja Gerar o PDF da lista?" + "\n" + "O app vai gerar um PDF e perguntar se deseja compartilhar.")
@@ -205,6 +204,27 @@ public class Lista extends Fragment {
                             })
                             .show();
 
+                })
+                .setNegativeButton("Não", null)
+                .show();
+    }*/
+
+    private void mostrarDialogoDeConfirmacao(List<ItenLista> listas,List<ListaItens> listaItens) {
+        new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                .setTitle("Finalizar Lista")
+                .setMessage("Deseja finalizar essa lista?"+"\n"+"O app vai limpar tudo e essa lista vai par o historico.")
+                .setPositiveButton("Sim", (dialog, which) -> {
+
+                    byte[] pdf = Finalizar.gerarPDF(requireContext(), listas,
+                            listaItens.get(0).getDia(),
+                            String.valueOf(listaItens.get(0).getValorTotal()),
+                            String.valueOf(listaItens.get(0).getValorRestante()),
+                            listaItens.get(0).getTitulo());
+
+                    String nomeArquivo = "relatorio_gastos.pdf";
+                    Finalizar.deletarArquivoDownloadsSeExistir(requireContext(), nomeArquivo);
+                    Finalizar.salvarPDFnoDownloads(requireContext(), pdf, nomeArquivo);
+                    requireActivity().getSupportFragmentManager().popBackStack();
                 })
                 .setNegativeButton("Não", null)
                 .show();

@@ -218,7 +218,6 @@ public class Finalizar extends Fragment {
         return outputStream.toByteArray();
     }
 
-
     public static void salvarPDFnoDownloads(Context context, byte[] pdfData, String nomeArquivo) {
         ContentValues values = new ContentValues();
         values.put(MediaStore.Downloads.DISPLAY_NAME, nomeArquivo);
@@ -261,8 +260,30 @@ public class Finalizar extends Fragment {
         if (cursor != null) cursor.close();
     }
 
+    private void mostrarDialogoDeConfirmacao(List<ItenLista> listas,List<ListaItens> listaItens) {
+        new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                .setTitle("Finalizar Lista")
+                .setMessage("Deseja finalizar essa lista?"+"\n"+"O app vai limpar tudo e essa lista vai par o historico.")
+                .setPositiveButton("Sim", (dialog, which) -> {
+                    trocarDeMes();
 
-    private void mostrarDialogoDeConfirmacao(List<ItenLista> listas, List<ListaItens> listaItens) {
+                    byte[] pdf = gerarPDF(requireContext(), listas,
+                            listaItens.get(0).getDia(),
+                            String.valueOf(listaItens.get(0).getValorTotal()),
+                            String.valueOf(listaItens.get(0).getValorRestante()),
+                            listaItens.get(0).getTitulo());
+
+                    String nomeArquivo = "relatorio_gastos.pdf";
+                    deletarArquivoDownloadsSeExistir(requireContext(), nomeArquivo);
+                    salvarPDFnoDownloads(requireContext(), pdf, nomeArquivo);
+                    geraTabela(listas,listaItens);
+                    requireActivity().getSupportFragmentManager().popBackStack();
+                })
+                .setNegativeButton("Não", null)
+                .show();
+    }
+
+    /*private void mostrarDialogoDeConfirmacao(List<ItenLista> listas, List<ListaItens> listaItens) {
         new AlertDialog.Builder(requireContext())
                 .setTitle("Finalizar Lista")
                 .setMessage("Deseja finalizar essa lista?" + "\n" + "O app vai gerar um PDF e perguntar se deseja compartilhar.")
@@ -319,7 +340,7 @@ public class Finalizar extends Fragment {
                 })
                 .setNegativeButton("Não", null)
                 .show();
-    }
+    }*/
 
 
     void salvarComoJson(BackupMensal backup, Context context) {
@@ -353,7 +374,7 @@ public class Finalizar extends Fragment {
         }
     }
 
-    void trocarDeMes() {
+    public void trocarDeMes() {
         List<String> esta = db.itenListaDao().getALLEsta();
         List<String> func = db.itenListaDao().getALLFunc();
         List<Float> valor = db.itenListaDao().getALLVAalor();
