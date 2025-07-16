@@ -1,9 +1,11 @@
 package com.example.gastosgeraisdomes.Telas;
 
+import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -21,6 +23,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
 import com.example.gastosgeraisdomes.Banco.AppDataBase;
@@ -32,6 +35,7 @@ import com.google.gson.Gson;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -71,7 +75,7 @@ public class Finalizar extends Fragment {
         });
     }
 
-    public static byte[] gerarPDF(Context context, List<ItenLista> gastos, String data, String totalFormatado, String titulo) {
+    public static byte[] gerarPDF(Context context, List<ItenLista> gastos, String data, String totalFormatado,String resto, String titulo) {
         PdfDocument pdfDocument = new PdfDocument();
         int pageWidth = 595;
         int pageHeight = 842;
@@ -180,6 +184,26 @@ public class Finalizar extends Fragment {
                 linhasDesenhadas++;
             }
 
+            // --- Cabeçalho ---
+            paint.setStyle(Paint.Style.STROKE);
+            canvas.drawRect(startX, currentY, startX + tableWidth, currentY + rowHeight, paint);
+
+            // Linhas verticais do cabeçalho
+            canvas.drawLine(xCol1, currentY, xCol1, currentY + rowHeight, paint);
+            canvas.drawLine(xCol2, currentY, xCol2, currentY + rowHeight, paint);
+            canvas.drawLine(xCol3, currentY, xCol3, currentY + rowHeight, paint);
+            canvas.drawLine(xCol4, currentY, xCol4, currentY + rowHeight, paint);
+
+            paint.setStyle(Paint.Style.FILL);
+            // Centraliza e desenha no cabeçalho
+            String[] fim = { " ", "Sobra do Mês", "R$ " + resto};
+            for (int i = 0; i < fim.length; i++) {
+                float textoWidth = paint.measureText(fim[i]);
+                float posX = colStarts[i] + (columnWidths[i] - textoWidth) / 2;
+                canvas.drawText(fim[i], posX, currentY + 25, paint);
+            }
+            currentY += rowHeight;
+
             pdfDocument.finishPage(page);
             paginaAtual++;
         }
@@ -238,23 +262,65 @@ public class Finalizar extends Fragment {
     }
 
 
-
-    private void mostrarDialogoDeConfirmacao(List<ItenLista> listas,List<ListaItens> listaItens) {
-        new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+    private void mostrarDialogoDeConfirmacao(List<ItenLista> listas, List<ListaItens> listaItens) {
+        new AlertDialog.Builder(requireContext())
                 .setTitle("Finalizar Lista")
-                .setMessage("Deseja finalizar essa lista?"+"\n"+"O app vai limpar tudo e essa lista vai par o historico.")
+                .setMessage("Deseja finalizar essa lista?" + "\n" + "O app vai gerar um PDF e perguntar se deseja compartilhar.")
                 .setPositiveButton("Sim", (dialog, which) -> {
-                    trocarDeMes();
-                    byte[] pdf = gerarPDF(requireContext(),listas,listaItens.get(0).getDia(),String.valueOf(listaItens.get(0).getValorTotal()),listaItens.get(0).getTitulo());
+
+                    // Gera o PDF
+                    byte[] pdf = gerarPDF(requireContext(), listas,
+                            listaItens.get(0).getDia(),
+                            String.valueOf(listaItens.get(0).getValorTotal()),
+                            String.valueOf(listaItens.get(0).getValorRestante()),
+                            listaItens.get(0).getTitulo());
+
+                    // Cria o arquivo na pasta interna visível ao FileProvider
+                    File pasta = new File(requireContext().getFilesDir(), "pdfs");
+                    if (!pasta.exists()) pasta.mkdirs();
                     String nomeArquivo = "relatorio_gastos.pdf";
-                    deletarArquivoDownloadsSeExistir(requireContext(), nomeArquivo);
-                    salvarPDFnoDownloads(requireContext(), pdf, nomeArquivo);
-                    geraTabela(listas,listaItens);
-                    requireActivity().getSupportFragmentManager().popBackStack();
+                    File arquivoPDF = new File(pasta, nomeArquivo);
+
+                    try (FileOutputStream fos = new FileOutputStream(arquivoPDF)) {
+                        fos.write(pdf);
+                        fos.flush();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        Toast.makeText(requireContext(), "Erro ao salvar PDF", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    // Pergunta se quer compartilhar
+                    new AlertDialog.Builder(requireContext())
+                            .setTitle("Compartilhar PDF")
+                            .setMessage("Deseja compartilhar o PDF agora?")
+                            .setPositiveButton("Sim", (dialog2, which2) -> {
+                                Uri uri = FileProvider.getUriForFile(requireContext(),
+                                        requireContext().getPackageName() + ".provider",
+                                        arquivoPDF);
+
+                                Intent intent = new Intent(Intent.ACTION_SEND);
+                                intent.setType("application/pdf");
+                                intent.putExtra(Intent.EXTRA_STREAM, uri);
+                                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                                startActivity(Intent.createChooser(intent, "Compartilhar PDF"));
+
+                                // ⚠️ Só aqui executa o restante das ações:
+                                trocarDeMes();
+                                geraTabela(listas, listaItens);
+                                requireActivity().getSupportFragmentManager().popBackStack();
+                            })
+                            .setNegativeButton("Não", (dialog2, which2) -> {
+                                Toast.makeText(requireContext(), "Ação cancelada", Toast.LENGTH_SHORT).show();
+                            })
+                            .show();
+
                 })
                 .setNegativeButton("Não", null)
                 .show();
     }
+
 
     void salvarComoJson(BackupMensal backup, Context context) {
         File dir = new File(context.getFilesDir(), "backups");
@@ -328,6 +394,30 @@ public class Finalizar extends Fragment {
             tabela.addView(row);
         }
         binding.sobraMes.setText("Sobra do mês: R$ " + String.valueOf(listaItens.get(0).getValorRestante()));
+    }
+
+    public void salvarECompartilharPDF(Context context, byte[] pdfData, String nomeArquivo) {
+        File pasta = new File(context.getFilesDir(), "pdfs");
+        if (!pasta.exists()) pasta.mkdirs();
+
+        File arquivo = new File(pasta, nomeArquivo);
+        try (FileOutputStream fos = new FileOutputStream(arquivo)) {
+            fos.write(pdfData);
+            fos.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+            Toast.makeText(context, "Erro ao salvar PDF", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Uri uri = FileProvider.getUriForFile(context, context.getPackageName() + ".provider", arquivo);
+
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("application/pdf");
+        intent.putExtra(Intent.EXTRA_STREAM, uri);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        context.startActivity(Intent.createChooser(intent, "Compartilhar PDF"));
     }
 
 

@@ -1,12 +1,12 @@
 <resources>
-    <string name="app_name">Gastos Gerais Do Mes</string>
+    <string name="app_name">Comtrole de Gastos</string>
     <string name="action_settings">Settings</string>
     <!-- Strings used for fragments for navigation -->
     <string name="inicio">Inicio</string>
     <string name="listaItens">Lista Dos Gastos</string>
-    <string name="iten">Iten da Lista</string>
+    <string name="iten">Item da Lista</string>
     <string name="histotico">Historico das Listas</string>
-    <string name="cria_iten">Cria novo Iten</string>
+    <string name="cria_iten">Cria novo Item</string>
     <string name="cria">Cria uma Nova Lista</string>
 
 
@@ -25,7 +25,7 @@
     <string name="bnt_busca">Busca</string>
     <string name="bnt_atualiza">Atualizar</string>
     <string name="bnt_criar">Criar</string>
-    <string name="bnt_excluir">Excluir Iten</string>
+    <string name="bnt_excluir">Excluir</string>
     <string name="bnt_finalizar">Finalizar Lista</string>
 
     <string name="lorem_ipsum">

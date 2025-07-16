@@ -9,5 +9,13 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="16dp"/>
+        android:padding="16dp">
+
+        <ListView
+            android:id="@+id/historico"
+            android:layout_width="match_parent"
+            android:layout_height="700dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>

@@ -26,7 +26,7 @@
             android:layout_height="wrap_content"
             android:stretchColumns="*"
             android:paddingTop="16dp"
-            android:background="#DDD">
+            android:background="@color/tabelaBackground">
 
             <TableRow>
                 <TextView android:text="Estabelecimento" style="@style/Cabecalho"/>

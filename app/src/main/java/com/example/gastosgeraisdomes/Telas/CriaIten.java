@@ -92,7 +92,8 @@ public class CriaIten extends Fragment {
                                 db.listaDao().upgrade(listaItens.get(0));
                                 db.itenListaDao().insertAll(itenLista);
                             }
-                            requireActivity().getSupportFragmentManager().popBackStack();
+                            limpa();
+                            //requireActivity().getSupportFragmentManager().popBackStack();
                         }else {
                             Toast.makeText(requireContext(), "Incira um valor valido", Toast.LENGTH_LONG).show();
                         }
@@ -104,6 +105,12 @@ public class CriaIten extends Fragment {
                 }
             }
         });
+    }
+
+    public void limpa(){
+        binding.valor.setText("0");
+        binding.funcao.setText("");
+        binding.estabelecimento.setText("");
     }
 
     @Override

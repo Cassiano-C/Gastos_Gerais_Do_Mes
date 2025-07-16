@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -11,10 +12,16 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.gastosgeraisdomes.Banco.AppDataBase;
 import com.example.gastosgeraisdomes.R;
+import com.example.gastosgeraisdomes.Tabelas.BackupMensal;
 import com.example.gastosgeraisdomes.Tabelas.ItenLista;
 import com.example.gastosgeraisdomes.Tabelas.ListaItens;
 import com.example.gastosgeraisdomes.databinding.ItenBinding;
+import com.google.gson.Gson;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.FilenameFilter;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Iten extends Fragment {
@@ -39,19 +46,28 @@ public class Iten extends Fragment {
         db = AppDataBase.getDataBase(getContext());
 
         Bundle arg = getArguments();
-        if(arg != null){
+        ItenLista iten;
+
+        if(arg != null) {
             int idIten = arg.getInt("id");
-            ItenLista iten = db.itenListaDao().Busca(idIten);
+            int i = arg.getInt("idArq");
+            if (i != -1) {
+                binding.excluir.setVisibility(View.GONE);
+                binding.atualiza.setVisibility(View.GONE);
+                iten = retornaIten(i, idIten);
+            } else {
+                iten = db.itenListaDao().Busca(idIten);
+            }
 
             binding.estabelecimento.setText(iten.getEstabelecimento());
             binding.funcao.setText(iten.getFuncao());
-            binding.valor.setText(String.valueOf(iten.getValor())+"$");
+            binding.valor.setText(String.valueOf(iten.getValor()) + "$");
 
             binding.atualiza.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Bundle bundle = new Bundle();
-                    bundle.putInt("id",idIten);
+                    bundle.putInt("id", idIten);
 
                     NavHostFragment.findNavController(Iten.this)
                             .navigate(R.id.action_iten2_to_criaIten, bundle);
@@ -59,7 +75,6 @@ public class Iten extends Fragment {
             });
 
             binding.excluir.setOnClickListener(v -> mostrarDialogoDeConfirmacao(iten));
-
         }
     }
 
@@ -82,6 +97,41 @@ public class Iten extends Fragment {
                 })
                 .setNegativeButton("Não", null)
                 .show();
+    }
+
+    public ItenLista retornaIten(int i,int posicion){
+        List<ItenLista> itenListaLista = new ArrayList<>();
+        File dir = new File(requireContext().getFilesDir(), "backups");
+        File[] arquivos = dir.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.endsWith(".json");
+            }
+        });
+        assert arquivos != null;
+        File meuArquivo = arquivos[i];
+        try {
+            FileReader reader = new FileReader(meuArquivo);
+            Gson gson = new Gson();
+            BackupMensal backupMensal = gson.fromJson(reader,BackupMensal.class);
+            reader.close();
+
+            List<String> estab = backupMensal.getEstabelecimento();
+            List<String> func = backupMensal.getFuncao();
+            List<Float> valor = backupMensal.getValor();
+
+            if (estab.size() == func.size() && func.size() == valor.size()) {
+                for (int j = 0; j < estab.size(); j++) {
+                    itenListaLista.add(new ItenLista(estab.get(j), func.get(j), valor.get(j)));
+                }
+            } else {
+                Toast.makeText(requireContext(), "Erro nos dados do backup", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return itenListaLista.get(posicion);
     }
 
     @Override

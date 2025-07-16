@@ -36,9 +36,11 @@ public class Inicio extends Fragment {
         if(db.listaDao().ExisteLista()){
             binding.cria.setText("Atualizar Lista");
             //Se tiver alguma lista criada vai deixar os botoes visiveis e acesivel
-            binding.gera.setVisibility(View.VISIBLE);
             binding.floatingActionButton.setVisibility(View.VISIBLE);
-            if(db.itenListaDao().Quantos() > 0) binding.listaItens.setVisibility(View.VISIBLE);
+            if(db.itenListaDao().Quantos() > 0) {
+                binding.gera.setVisibility(View.VISIBLE);
+                binding.listaItens.setVisibility(View.VISIBLE);
+            }
             binding.historico.setVisibility(View.VISIBLE);
             //Vai colocar os valores em seus devidos lugares
             binding.valTotal.setText("Total: R$ "+db.listaDao().Total());

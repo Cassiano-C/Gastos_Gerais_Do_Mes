@@ -2,6 +2,7 @@ package com.example.gastosgeraisdomes.Tabelas;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 @Entity(tableName = "lista_itens")
@@ -23,6 +24,15 @@ public class ListaItens {
         this.titulo = titulo;
         this.dia = dia;
         this.valorTotal = valorTotal;
+    }
+
+    @Ignore
+    public ListaItens(String titulo, String dia, float valorTotal, float valorGasto, float valorRestante) {
+        this.titulo = titulo;
+        this.dia = dia;
+        this.valorTotal = valorTotal;
+        this.valorGasto = valorGasto;
+        this.valorRestante = valorRestante;
     }
 
     public int getIdLista() {
