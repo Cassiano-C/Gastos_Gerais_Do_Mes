@@ -67,11 +67,11 @@ public class Finalizar extends Fragment {
         List<ListaItens> listaItens = db.listaDao().getALL();
         geraTabela(listas,listaItens);
 
-        binding.bntFinalizar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mostrarDialogoDeConfirmacao(listas,listaItens);
-            }
+        binding.bntFinalizar.setOnClickListener(v -> {
+            mostrarDialogoDeConfirmacao(listas,listaItens);
+        });
+        binding.bntCompartilhar.setOnClickListener(v -> {
+            mostrarDialogoDeConfirmacaoCompartilhar(listas,listaItens);
         });
     }
 
@@ -283,7 +283,7 @@ public class Finalizar extends Fragment {
                 .show();
     }
 
-    /*private void mostrarDialogoDeConfirmacao(List<ItenLista> listas, List<ListaItens> listaItens) {
+    private void mostrarDialogoDeConfirmacaoCompartilhar(List<ItenLista> listas, List<ListaItens> listaItens) {
         new AlertDialog.Builder(requireContext())
                 .setTitle("Finalizar Lista")
                 .setMessage("Deseja finalizar essa lista?" + "\n" + "O app vai gerar um PDF e perguntar se deseja compartilhar.")
@@ -340,7 +340,7 @@ public class Finalizar extends Fragment {
                 })
                 .setNegativeButton("Não", null)
                 .show();
-    }*/
+    }
 
 
     void salvarComoJson(BackupMensal backup, Context context) {

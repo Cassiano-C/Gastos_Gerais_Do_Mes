@@ -1,5 +1,6 @@
 package com.example.gastosgeraisdomes.Telas;
 
+import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +16,7 @@ import com.example.gastosgeraisdomes.databinding.CriaBinding;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
 import java.util.List;
 
 public class Cria  extends Fragment {
@@ -61,15 +63,31 @@ public class Cria  extends Fragment {
             binding.data.setText(dataAtual);
         }
 
+        binding.definirData.setOnClickListener(v -> {
+            final Calendar calendar = Calendar.getInstance();
+            int year = calendar.get(Calendar.YEAR);
+            int month = calendar.get(Calendar.MONTH);
+            int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+            DatePickerDialog datePickerDialog = new DatePickerDialog(
+                    getContext(),
+                    (datePickerView, year1, month1, dayOfMonth) -> {
+                        String selectedDate = dayOfMonth + "/" + (month1 + 1) + "/" + year1;
+                        binding.data.setText(selectedDate);
+                    },
+                    year, month, day);
+            datePickerDialog.show();
+        });
 
         binding.criar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String titulo = binding.titulo.getText().toString().trim();
+                String dataM = binding.data.getText().toString().trim();
                 float valor = Float.parseFloat(binding.valor.getText().toString().trim());
                 try {
                     if(valor > 0.0){
-                        ListaItens lista = new ListaItens(titulo,dataAtual,valor);
+                        ListaItens lista = new ListaItens(titulo,dataM,valor);
                         if(arg != null && arg.getBoolean("at")){
                             lista.setValorGasto(gastoAntigo);
                             lista.setValorRestante(valor-gastoAntigo);

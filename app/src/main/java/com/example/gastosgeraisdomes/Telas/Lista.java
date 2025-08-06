@@ -96,6 +96,7 @@ public class Lista extends Fragment {
                 throw new RuntimeException(e);
             }
             binding.finalizar.setVisibility(View.VISIBLE);
+            binding.compartilhar.setVisibility(View.VISIBLE);
         }else {
             itenListaLista = db.itenListaDao().getALL();
             gasto = db.listaDao().Gasto();
@@ -151,10 +152,13 @@ public class Lista extends Fragment {
             }
         });
 
+        binding.compartilhar.setOnClickListener(v -> {
+            mostrarDialogoDeConfirmacaoCompartilhar(itenListaLista,listaItens);
+        });
 
     }
 
-    /*private void mostrarDialogoDeConfirmacao(List<ItenLista> listas, List<ListaItens> listaItens) {
+    private void mostrarDialogoDeConfirmacaoCompartilhar(List<ItenLista> listas, List<ListaItens> listaItens) {
         new AlertDialog.Builder(requireContext())
                 .setTitle("Gerar o PDF da Lista")
                 .setMessage("Deseja Gerar o PDF da lista?" + "\n" + "O app vai gerar um PDF e perguntar se deseja compartilhar.")
@@ -207,7 +211,7 @@ public class Lista extends Fragment {
                 })
                 .setNegativeButton("Não", null)
                 .show();
-    }*/
+    }
 
     private void mostrarDialogoDeConfirmacao(List<ItenLista> listas,List<ListaItens> listaItens) {
         new androidx.appcompat.app.AlertDialog.Builder(requireContext())

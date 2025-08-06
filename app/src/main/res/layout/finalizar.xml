@@ -48,6 +48,12 @@
             android:layout_marginTop="24dp"/>
 
         <Button
+            android:id="@+id/bnt_compartilhar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/bnt_compar" />
+
+        <Button
             android:id="@+id/bnt_finalizar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
