@@ -69,9 +69,6 @@
         <action
             android:id="@+id/action_historico2_to_inicio"
             app:destination="@id/inicio" />
-        <action
-            android:id="@+id/action_historico_to_listaItens"
-            app:destination="@id/listaItens" />
     </fragment>
     <fragment
         android:id="@+id/iten"

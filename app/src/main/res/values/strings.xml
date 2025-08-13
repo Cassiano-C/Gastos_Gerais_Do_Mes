@@ -29,6 +29,7 @@
     <string name="bnt_finalizar">Finalizar Lista</string>
     <string name="bnt_data">Definir uma data</string>
     <string name="bnt_compar">Compartilhar PDF</string>
+    <string name="bnt_carega">Caregar Histotico</string>
 
     <string name="lorem_ipsum">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in scelerisque sem. Mauris

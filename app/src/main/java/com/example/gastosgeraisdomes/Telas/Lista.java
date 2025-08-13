@@ -57,51 +57,10 @@ public class Lista extends Fragment {
         float gasto = 0;
         float rest = 0;
         List<ItenLista> itenListaLista;
-        List<ListaItens> listaItens = new ArrayList<>();
 
-        Bundle arg = getArguments();
-        if(arg != null){
-            itenListaLista = new ArrayList<>();
-            i = arg.getInt("idArq");
-            File dir = new File(requireContext().getFilesDir(), "backups");
-            File[] arquivos = dir.listFiles(new FilenameFilter() {
-                @Override
-                public boolean accept(File dir, String name) {
-                    return name.endsWith(".json");
-                }
-            });
-            assert arquivos != null;
-            File meuArquivo = arquivos[i];
-            try {
-                FileReader reader = new FileReader(meuArquivo);
-                Gson gson = new Gson();
-                BackupMensal backupMensal = gson.fromJson(reader,BackupMensal.class);
-                reader.close();
-                gasto = backupMensal.getValorGasto();
-                rest = backupMensal.getValorRestante();
-
-                List<String> estab = backupMensal.getEstabelecimento();
-                List<String> func = backupMensal.getFuncao();
-                List<Float> valor = backupMensal.getValor();
-                listaItens.add(new ListaItens(backupMensal.getTitulo(),backupMensal.getDia(),backupMensal.getValorTotal(),backupMensal.getValorGasto(),backupMensal.getValorRestante()));
-
-                if (estab.size() == func.size() && func.size() == valor.size()) {
-                    for (int j = 0; j < estab.size(); j++) {
-                        itenListaLista.add(new ItenLista(estab.get(j), func.get(j), valor.get(j)));
-                    }
-                } else {
-                    Toast.makeText(requireContext(), "Erro nos dados do backup", Toast.LENGTH_SHORT).show();
-                }
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-            binding.finalizar.setVisibility(View.VISIBLE);
-            binding.compartilhar.setVisibility(View.VISIBLE);
-        }else {
-            itenListaLista = db.itenListaDao().getALL();
-            gasto = db.listaDao().Gasto();
-            rest = db.listaDao().Restante();
-        }
+        itenListaLista = db.itenListaDao().getALL();
+        gasto = db.listaDao().Gasto();
+        rest = db.listaDao().Restante();
 
         ArrayAdapter<ItenLista> adapter = new ArrayAdapter<>(requireContext(),android.R.layout.simple_list_item_activated_1,itenListaLista);
         binding.listaItens.setAdapter(adapter);
@@ -144,94 +103,6 @@ public class Lista extends Fragment {
                         .navigate(R.id.action_lista_to_iten2, bundle);
             }
         });
-
-        binding.finalizar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mostrarDialogoDeConfirmacao(itenListaLista,listaItens);
-            }
-        });
-
-        binding.compartilhar.setOnClickListener(v -> {
-            mostrarDialogoDeConfirmacaoCompartilhar(itenListaLista,listaItens);
-        });
-
-    }
-
-    private void mostrarDialogoDeConfirmacaoCompartilhar(List<ItenLista> listas, List<ListaItens> listaItens) {
-        new AlertDialog.Builder(requireContext())
-                .setTitle("Gerar o PDF da Lista")
-                .setMessage("Deseja Gerar o PDF da lista?" + "\n" + "O app vai gerar um PDF e perguntar se deseja compartilhar.")
-                .setPositiveButton("Sim", (dialog, which) -> {
-
-                    // Gera o PDF
-                    byte[] pdf = Finalizar.gerarPDF(requireContext(), listas,
-                            listaItens.get(0).getDia(),
-                            String.valueOf(listaItens.get(0).getValorTotal()),
-                            String.valueOf(listaItens.get(0).getValorRestante()),
-                            listaItens.get(0).getTitulo());
-
-                    // Cria o arquivo na pasta interna visível ao FileProvider
-                    File pasta = new File(requireContext().getFilesDir(), "pdfs");
-                    if (!pasta.exists()) pasta.mkdirs();
-                    String nomeArquivo = "relatorio_gastos.pdf";
-                    File arquivoPDF = new File(pasta, nomeArquivo);
-
-                    try (FileOutputStream fos = new FileOutputStream(arquivoPDF)) {
-                        fos.write(pdf);
-                        fos.flush();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        Toast.makeText(requireContext(), "Erro ao salvar PDF", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
-                    // Pergunta se quer compartilhar
-                    new AlertDialog.Builder(requireContext())
-                            .setTitle("Compartilhar PDF")
-                            .setMessage("Deseja compartilhar o PDF agora?")
-                            .setPositiveButton("Sim", (dialog2, which2) -> {
-                                Uri uri = FileProvider.getUriForFile(requireContext(),
-                                        requireContext().getPackageName() + ".provider",
-                                        arquivoPDF);
-
-                                Intent intent = new Intent(Intent.ACTION_SEND);
-                                intent.setType("application/pdf");
-                                intent.putExtra(Intent.EXTRA_STREAM, uri);
-                                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-                                startActivity(Intent.createChooser(intent, "Compartilhar PDF"));
-                                requireActivity().getSupportFragmentManager().popBackStack();
-                            })
-                            .setNegativeButton("Não", (dialog2, which2) -> {
-                                Toast.makeText(requireContext(), "Ação cancelada", Toast.LENGTH_SHORT).show();
-                            })
-                            .show();
-
-                })
-                .setNegativeButton("Não", null)
-                .show();
-    }
-
-    private void mostrarDialogoDeConfirmacao(List<ItenLista> listas,List<ListaItens> listaItens) {
-        new androidx.appcompat.app.AlertDialog.Builder(requireContext())
-                .setTitle("Finalizar Lista")
-                .setMessage("Deseja finalizar essa lista?"+"\n"+"O app vai limpar tudo e essa lista vai par o historico.")
-                .setPositiveButton("Sim", (dialog, which) -> {
-
-                    byte[] pdf = Finalizar.gerarPDF(requireContext(), listas,
-                            listaItens.get(0).getDia(),
-                            String.valueOf(listaItens.get(0).getValorTotal()),
-                            String.valueOf(listaItens.get(0).getValorRestante()),
-                            listaItens.get(0).getTitulo());
-
-                    String nomeArquivo = "relatorio_gastos.pdf";
-                    Finalizar.deletarArquivoDownloadsSeExistir(requireContext(), nomeArquivo);
-                    Finalizar.salvarPDFnoDownloads(requireContext(), pdf, nomeArquivo);
-                    requireActivity().getSupportFragmentManager().popBackStack();
-                })
-                .setNegativeButton("Não", null)
-                .show();
     }
 
     @Override

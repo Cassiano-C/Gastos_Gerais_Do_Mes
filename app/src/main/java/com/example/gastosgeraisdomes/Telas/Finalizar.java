@@ -14,6 +14,9 @@ import android.graphics.pdf.PdfDocument;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.text.Layout;
+import android.text.StaticLayout;
+import android.text.TextPaint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,6 +42,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -75,134 +79,194 @@ public class Finalizar extends Fragment {
         });
     }
 
-    public static byte[] gerarPDF(Context context, List<ItenLista> gastos, String data, String totalFormatado,String resto, String titulo) {
+    public static byte[] gerarPDF(Context context, List<ItenLista> gastos, String data, String totalFormatado, String resto, String gas, String titulo) {
         PdfDocument pdfDocument = new PdfDocument();
         int pageWidth = 595;
         int pageHeight = 842;
 
         int startX = 40;
-        int tableWidth = 515;
-        int[] columnWidths = {150, 200, 165};
-        int rowHeight = 40;
+        int[] columnWidths = {170, 170, 170};
+        int tableWidth = columnWidths[0]*3;
 
-        int maxLinhasPorPagina = 30; // ajuste conforme fonte/altura
-        int totalLinhas = gastos.size() + 2; // "Caixa" + cabeçalho + dados
 
         int paginaAtual = 1;
         int linhaGlobal = 0;
 
-        // Cálculo das posições verticais das linhas (colunas)
+        // Formatador para 2 casas decimais
+        DecimalFormat df = new DecimalFormat("#,##0.00");
+        String gasFmt = df.format(Double.parseDouble(gas));
+        String restoFmt = df.format(Double.parseDouble(resto));
+
+        // Margens e tamanhos fixos
+        int topMargin = 50;
+        int bottomMargin = 40;
+        int titleHeight = 30;
+        int caixaHeight = 40;
+        int headerRowHeight = 40;
+        int footerHeight = 40 * 2 + 10;
+        int cellPaddingVertical = 6;
+        int cellPaddingHorizontal = 1;
+
+        // Posições das colunas
         int xCol1 = startX;
         int xCol2 = xCol1 + columnWidths[0];
         int xCol3 = xCol2 + columnWidths[1];
-        int xCol4 = xCol3 + columnWidths[2]; // = startX + tableWidth
+        int xCol4 = xCol3 + columnWidths[2];
 
-        while (linhaGlobal < totalLinhas - 2) {
+        while (linhaGlobal < gastos.size()) {
             PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(pageWidth, pageHeight, paginaAtual).create();
             PdfDocument.Page page = pdfDocument.startPage(pageInfo);
             Canvas canvas = page.getCanvas();
             Paint paint = new Paint();
-
-            int currentY = 50;
-
-            // Título
-            paint.setTextSize(18);
-            paint.setFakeBoldText(true);
-            float larguraTexto = paint.measureText(titulo);
-            canvas.drawText(titulo, (pageWidth - larguraTexto) / 2, currentY, paint);
-            currentY += 30;
-
-            paint.setStrokeWidth(2);
             paint.setColor(Color.BLACK);
-            paint.setFakeBoldText(true);
-            paint.setTextSize(14);
 
-            // --- Linha "Caixa" ---
-            paint.setStyle(Paint.Style.STROKE);
-            canvas.drawRect(startX, currentY, startX + tableWidth, currentY + rowHeight, paint);
+            int currentY = topMargin;
 
-            // Linhas verticais da "Caixa"
-            canvas.drawLine(xCol1, currentY, xCol1, currentY + rowHeight, paint);
-            canvas.drawLine(xCol2, currentY, xCol2, currentY + rowHeight, paint);
-            canvas.drawLine(xCol3, currentY, xCol3, currentY + rowHeight, paint);
-            canvas.drawLine(xCol4, currentY, xCol4, currentY + rowHeight, paint);
+            // Cabeçalho só na primeira página
+            if (paginaAtual == 1) {
+                paint.setTextSize(18);
+                paint.setFakeBoldText(true);
+                float larguraTexto = paint.measureText(titulo);
+                canvas.drawText(titulo, (pageWidth - larguraTexto) / 2, currentY, paint);
+                currentY += titleHeight;
 
-            paint.setStyle(Paint.Style.FILL);
-            String[] caixaTexts = { "Caixa", data, "Total: R$ " + totalFormatado };
-            int[] colStarts = { xCol1, xCol2, xCol3 };
-            for (int i = 0; i < caixaTexts.length; i++) {
-                float textoWidth = paint.measureText(caixaTexts[i]);
-                float posX = colStarts[i] + (columnWidths[i] - textoWidth) / 2;
-                canvas.drawText(caixaTexts[i], posX, currentY + 25, paint);
-            }
-            currentY += rowHeight;
-
-            // --- Cabeçalho ---
-            paint.setStyle(Paint.Style.STROKE);
-            canvas.drawRect(startX, currentY, startX + tableWidth, currentY + rowHeight, paint);
-
-            // Linhas verticais do cabeçalho
-            canvas.drawLine(xCol1, currentY, xCol1, currentY + rowHeight, paint);
-            canvas.drawLine(xCol2, currentY, xCol2, currentY + rowHeight, paint);
-            canvas.drawLine(xCol3, currentY, xCol3, currentY + rowHeight, paint);
-            canvas.drawLine(xCol4, currentY, xCol4, currentY + rowHeight, paint);
-
-            paint.setStyle(Paint.Style.FILL);
-            // Centraliza e desenha no cabeçalho
-            String[] headerTexts = { "ESTABELECIMENTO", "FUNCIONALIDADE", "VALOR" };
-            for (int i = 0; i < headerTexts.length; i++) {
-                float textoWidth = paint.measureText(headerTexts[i]);
-                float posX = colStarts[i] + (columnWidths[i] - textoWidth) / 2;
-                canvas.drawText(headerTexts[i], posX, currentY + 25, paint);
-            }
-            currentY += rowHeight;
-            paint.setStyle(Paint.Style.STROKE);
-
-            // --- Linhas dos dados ---
-            paint.setFakeBoldText(false);
-            int linhasDesenhadas = 0;
-
-            while (linhaGlobal < gastos.size() && linhasDesenhadas < maxLinhasPorPagina - 2) {
-                ItenLista gasto = gastos.get(linhaGlobal);
-
+                // Caixa
+                paint.setStrokeWidth(2);
                 paint.setStyle(Paint.Style.STROKE);
-                canvas.drawRect(startX, currentY, startX + tableWidth, currentY + rowHeight, paint);
-
-                // Linhas verticais
-                canvas.drawLine(xCol1, currentY, xCol1, currentY + rowHeight, paint);
-                canvas.drawLine(xCol2, currentY, xCol2, currentY + rowHeight, paint);
-                canvas.drawLine(xCol3, currentY, xCol3, currentY + rowHeight, paint);
-                canvas.drawLine(xCol4, currentY, xCol4, currentY + rowHeight, paint);
+                canvas.drawRect(startX, currentY, startX + tableWidth, currentY + caixaHeight, paint);
+                canvas.drawLine(xCol1, currentY, xCol1, currentY + caixaHeight, paint);
+                canvas.drawLine(xCol2, currentY, xCol2, currentY + caixaHeight, paint);
+                canvas.drawLine(xCol3, currentY, xCol3, currentY + caixaHeight, paint);
+                canvas.drawLine(xCol4, currentY, xCol4, currentY + caixaHeight, paint);
 
                 paint.setStyle(Paint.Style.FILL);
-                canvas.drawText(gasto.getEstabelecimento(), xCol1 + 10, currentY + 25, paint);
-                canvas.drawText(gasto.getFuncao(), xCol2 + 10, currentY + 25, paint);
-                canvas.drawText("R$ " + String.valueOf(gasto.getValor()), xCol3 + 10, currentY + 25, paint);
+                paint.setTextSize(14);
+                paint.setFakeBoldText(true);
+                String[] caixaTexts = {"Caixa", data, "Total: R$ " + totalFormatado};
+                int[] colStarts = {xCol1, xCol2, xCol3};
+                for (int i = 0; i < caixaTexts.length; i++) {
+                    float textoWidth = paint.measureText(caixaTexts[i]);
+                    float posX = colStarts[i] + (columnWidths[i] - textoWidth) / 2;
+                    canvas.drawText(caixaTexts[i], posX, currentY + 25, paint);
+                }
+                currentY += caixaHeight;
 
-                currentY += rowHeight;
+                // Cabeçalho
+                paint.setStyle(Paint.Style.STROKE);
+                canvas.drawRect(startX, currentY, startX + tableWidth, currentY + headerRowHeight, paint);
+                canvas.drawLine(xCol1, currentY, xCol1, currentY + headerRowHeight, paint);
+                canvas.drawLine(xCol2, currentY, xCol2, currentY + headerRowHeight, paint);
+                canvas.drawLine(xCol3, currentY, xCol3, currentY + headerRowHeight, paint);
+                canvas.drawLine(xCol4, currentY, xCol4, currentY + headerRowHeight, paint);
+
+                paint.setStyle(Paint.Style.FILL);
+                String[] headerTexts = {"ESTABELECIMENTO", "FUNCIONALIDADE", "VALOR"};
+                for (int i = 0; i < headerTexts.length; i++) {
+                    float textoWidth = paint.measureText(headerTexts[i]);
+                    float posX = colStarts[i] + (columnWidths[i] - textoWidth) / 2;
+                    canvas.drawText(headerTexts[i], posX, currentY + 25, paint);
+                }
+                currentY += headerRowHeight;
+            }
+
+            int pageBottomLimit = pageHeight - bottomMargin;
+
+            // Linhas dos dados
+            while (linhaGlobal < gastos.size()) {
+                ItenLista gasto = gastos.get(linhaGlobal);
+
+                TextPaint tp = new TextPaint();
+                tp.setTextSize(14);
+                tp.setColor(Color.BLACK);
+
+                StaticLayout layout1 = StaticLayout.Builder.obtain(gasto.getEstabelecimento(), 0, gasto.getEstabelecimento().length(), tp, columnWidths[0] - cellPaddingHorizontal * 2)
+                        .setAlignment(Layout.Alignment.ALIGN_NORMAL)
+                        .setIncludePad(false)
+                        .build();
+
+                StaticLayout layout2 = StaticLayout.Builder.obtain(gasto.getFuncao(), 0, gasto.getFuncao().length(), tp, columnWidths[1] - cellPaddingHorizontal * 2)
+                        .setAlignment(Layout.Alignment.ALIGN_NORMAL)
+                        .setIncludePad(false)
+                        .build();
+
+                String valorStr = "R$ " + df.format(gasto.getValor()); // << formatação aplicada aqui
+                StaticLayout layout3 = StaticLayout.Builder.obtain(valorStr, 0, valorStr.length(), tp, columnWidths[2] - cellPaddingHorizontal * 2)
+                        .setAlignment(Layout.Alignment.ALIGN_NORMAL)
+                        .setIncludePad(false)
+                        .build();
+
+                int contentMaxHeight = Math.max(layout1.getHeight(), Math.max(layout2.getHeight(), layout3.getHeight()));
+                int cellHeight = contentMaxHeight + cellPaddingVertical * 2;
+
+                boolean isLastRow = (linhaGlobal == gastos.size() - 1);
+                int reserve = isLastRow ? footerHeight : 0;
+                if (currentY + cellHeight + reserve > pageBottomLimit) {
+                    break;
+                }
+
+                paint.setStyle(Paint.Style.STROKE);
+                canvas.drawRect(startX, currentY, startX + tableWidth, currentY + cellHeight, paint);
+                canvas.drawLine(xCol1, currentY, xCol1, currentY + cellHeight, paint);
+                canvas.drawLine(xCol2, currentY, xCol2, currentY + cellHeight, paint);
+                canvas.drawLine(xCol3, currentY, xCol3, currentY + cellHeight, paint);
+                canvas.drawLine(xCol4, currentY, xCol4, currentY + cellHeight, paint);
+
+                paint.setStyle(Paint.Style.FILL);
+                float drawX1 = xCol1 + cellPaddingHorizontal;
+                float drawX2 = xCol2 + cellPaddingHorizontal;
+                float drawX3 = xCol3 + cellPaddingHorizontal;
+
+                float yInnerTop = currentY + cellPaddingVertical;
+                float yForLayout1 = yInnerTop + (contentMaxHeight - layout1.getHeight()) / 2f;
+                float yForLayout2 = yInnerTop + (contentMaxHeight - layout2.getHeight()) / 2f;
+                float yForLayout3 = yInnerTop + (contentMaxHeight - layout3.getHeight()) / 2f;
+
+                drawStaticLayoutAt(canvas, layout1, drawX1, yForLayout1);
+                drawStaticLayoutAt(canvas, layout2, drawX2, yForLayout2);
+                drawStaticLayoutAt(canvas, layout3, drawX3, yForLayout3);
+
+                currentY += cellHeight;
                 linhaGlobal++;
-                linhasDesenhadas++;
             }
 
-            // --- Cabeçalho ---
-            paint.setStyle(Paint.Style.STROKE);
-            canvas.drawRect(startX, currentY, startX + tableWidth, currentY + rowHeight, paint);
+            // Rodapé só no fim
+            if (linhaGlobal >= gastos.size()) {
+                int rowH = 40;
 
-            // Linhas verticais do cabeçalho
-            canvas.drawLine(xCol1, currentY, xCol1, currentY + rowHeight, paint);
-            canvas.drawLine(xCol2, currentY, xCol2, currentY + rowHeight, paint);
-            canvas.drawLine(xCol3, currentY, xCol3, currentY + rowHeight, paint);
-            canvas.drawLine(xCol4, currentY, xCol4, currentY + rowHeight, paint);
+                // TOTAL
+                paint.setStyle(Paint.Style.STROKE);
+                canvas.drawRect(startX, currentY, startX + tableWidth, currentY + rowH, paint);
+                canvas.drawLine(xCol1, currentY, xCol1, currentY + rowH, paint);
+                canvas.drawLine(xCol2, currentY, xCol2, currentY + rowH, paint);
+                canvas.drawLine(xCol3, currentY, xCol3, currentY + rowH, paint);
+                canvas.drawLine(xCol4, currentY, xCol4, currentY + rowH, paint);
 
-            paint.setStyle(Paint.Style.FILL);
-            // Centraliza e desenha no cabeçalho
-            String[] fim = { " ", "Sobra do Mês", "R$ " + resto};
-            for (int i = 0; i < fim.length; i++) {
-                float textoWidth = paint.measureText(fim[i]);
-                float posX = colStarts[i] + (columnWidths[i] - textoWidth) / 2;
-                canvas.drawText(fim[i], posX, currentY + 25, paint);
+                paint.setStyle(Paint.Style.FILL);
+                String[] t = {" ", "TOTAL", "R$ " + gasFmt};
+                int[] colStarts = {xCol1, xCol2, xCol3};
+                for (int i = 0; i < t.length; i++) {
+                    float textoWidth = paint.measureText(t[i]);
+                    float posX = colStarts[i] + (columnWidths[i] - textoWidth) / 2;
+                    canvas.drawText(t[i], posX, currentY + 25, paint);
+                }
+                currentY += rowH;
+
+                // SOBRA DO MÊS
+                paint.setStyle(Paint.Style.STROKE);
+                canvas.drawRect(startX, currentY, startX + tableWidth, currentY + rowH, paint);
+                canvas.drawLine(xCol1, currentY, xCol1, currentY + rowH, paint);
+                canvas.drawLine(xCol2, currentY, xCol2, currentY + rowH, paint);
+                canvas.drawLine(xCol3, currentY, xCol3, currentY + rowH, paint);
+                canvas.drawLine(xCol4, currentY, xCol4, currentY + rowH, paint);
+
+                paint.setStyle(Paint.Style.FILL);
+                String[] fim = {" ", "Sobra do Mês", "R$ " + restoFmt};
+                for (int i = 0; i < fim.length; i++) {
+                    float textoWidth = paint.measureText(fim[i]);
+                    float posX = colStarts[i] + (columnWidths[i] - textoWidth) / 2;
+                    canvas.drawText(fim[i], posX, currentY + 25, paint);
+                }
             }
-            currentY += rowHeight;
 
             pdfDocument.finishPage(page);
             paginaAtual++;
@@ -217,6 +281,46 @@ public class Finalizar extends Fragment {
         pdfDocument.close();
         return outputStream.toByteArray();
     }
+
+    private static void drawStaticLayoutAt(Canvas canvas, StaticLayout layout, float x, float y) {
+        canvas.save();
+        canvas.translate(x, y);
+        layout.draw(canvas);
+        canvas.restore();
+    }
+
+
+    // Alinhado à esquerda ou centro
+    private static StaticLayout criarLayoutAlinhado(String text, int maxWidth, Layout.Alignment align) {
+        TextPaint paint = new TextPaint();
+        paint.setTextSize(14);
+        paint.setColor(Color.BLACK);
+        return StaticLayout.Builder.obtain(text, 0, text.length(), paint, maxWidth)
+                .setAlignment(align)
+                .setIncludePad(false)
+                .build();
+    }
+
+    // Alinhado à direita
+    private static StaticLayout criarLayoutDireita(String text, int maxWidth) {
+        TextPaint paint = new TextPaint();
+        paint.setTextSize(14);
+        paint.setColor(Color.BLACK);
+        float textWidth = paint.measureText(text);
+        // cria layout e desloca manualmente para direita na hora de desenhar
+        return StaticLayout.Builder.obtain(text, 0, text.length(), paint, Math.max(maxWidth, (int) textWidth))
+                .setAlignment(Layout.Alignment.ALIGN_OPPOSITE)
+                .setIncludePad(false)
+                .build();
+    }
+
+    private static void drawWrappedLayout(Canvas canvas, StaticLayout layout, float x, float y) {
+        canvas.save();
+        canvas.translate(x, y);
+        layout.draw(canvas);
+        canvas.restore();
+    }
+
 
     public static void salvarPDFnoDownloads(Context context, byte[] pdfData, String nomeArquivo) {
         ContentValues values = new ContentValues();
@@ -271,6 +375,7 @@ public class Finalizar extends Fragment {
                             listaItens.get(0).getDia(),
                             String.valueOf(listaItens.get(0).getValorTotal()),
                             String.valueOf(listaItens.get(0).getValorRestante()),
+                            String.valueOf(listaItens.get(0).getValorGasto()),
                             listaItens.get(0).getTitulo());
 
                     String nomeArquivo = "relatorio_gastos.pdf";
@@ -286,7 +391,7 @@ public class Finalizar extends Fragment {
     private void mostrarDialogoDeConfirmacaoCompartilhar(List<ItenLista> listas, List<ListaItens> listaItens) {
         new AlertDialog.Builder(requireContext())
                 .setTitle("Finalizar Lista")
-                .setMessage("Deseja finalizar essa lista?" + "\n" + "O app vai gerar um PDF e perguntar se deseja compartilhar.")
+                .setMessage("Deseja finalizar essa lista?" + "\n" + "O app vai gerar um PDF para compartilhar.")
                 .setPositiveButton("Sim", (dialog, which) -> {
 
                     // Gera o PDF
@@ -294,6 +399,7 @@ public class Finalizar extends Fragment {
                             listaItens.get(0).getDia(),
                             String.valueOf(listaItens.get(0).getValorTotal()),
                             String.valueOf(listaItens.get(0).getValorRestante()),
+                            String.valueOf(listaItens.get(0).getValorGasto()),
                             listaItens.get(0).getTitulo());
 
                     // Cria o arquivo na pasta interna visível ao FileProvider
@@ -311,34 +417,26 @@ public class Finalizar extends Fragment {
                         return;
                     }
 
-                    // Pergunta se quer compartilhar
-                    new AlertDialog.Builder(requireContext())
-                            .setTitle("Compartilhar PDF")
-                            .setMessage("Deseja compartilhar o PDF agora?")
-                            .setPositiveButton("Sim", (dialog2, which2) -> {
-                                Uri uri = FileProvider.getUriForFile(requireContext(),
-                                        requireContext().getPackageName() + ".provider",
-                                        arquivoPDF);
 
-                                Intent intent = new Intent(Intent.ACTION_SEND);
-                                intent.setType("application/pdf");
-                                intent.putExtra(Intent.EXTRA_STREAM, uri);
-                                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                Uri uri = FileProvider.getUriForFile(requireContext(),
+                        requireContext().getPackageName() + ".provider",
+                        arquivoPDF);
 
-                                startActivity(Intent.createChooser(intent, "Compartilhar PDF"));
+                Intent intent = new Intent(Intent.ACTION_SEND);
+                intent.setType("application/pdf");
+                intent.putExtra(Intent.EXTRA_STREAM, uri);
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-                                // ⚠️ Só aqui executa o restante das ações:
-                                trocarDeMes();
-                                geraTabela(listas, listaItens);
-                                requireActivity().getSupportFragmentManager().popBackStack();
-                            })
-                            .setNegativeButton("Não", (dialog2, which2) -> {
-                                Toast.makeText(requireContext(), "Ação cancelada", Toast.LENGTH_SHORT).show();
-                            })
-                            .show();
+                startActivity(Intent.createChooser(intent, "Compartilhar PDF"));
 
+                // ⚠️ Só aqui executa o restante das ações:
+                trocarDeMes();
+                geraTabela(listas, listaItens);
+                requireActivity().getSupportFragmentManager().popBackStack();
                 })
-                .setNegativeButton("Não", null)
+                .setNegativeButton("Não", (dialog2, which2) -> {
+                    Toast.makeText(requireContext(), "Ação cancelada", Toast.LENGTH_SHORT).show();
+                })
                 .show();
     }
 

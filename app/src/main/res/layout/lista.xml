@@ -56,27 +56,5 @@
             android:layout_marginTop="20dp"
             app:layout_constraintTop_toBottomOf="@id/pesquisa"
             app:layout_constraintEnd_toEndOf="parent"/>
-
-        <Button
-            android:id="@+id/compartilhar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/bnt_compar"
-            android:layout_marginTop="30dp"
-            android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@id/lista_itens"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
-
-        <Button
-            android:id="@+id/finalizar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/bnt_finalizar"
-            android:layout_marginTop="30dp"
-            android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@id/compartilhar"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>

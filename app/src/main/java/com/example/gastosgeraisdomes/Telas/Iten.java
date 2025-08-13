@@ -50,14 +50,7 @@ public class Iten extends Fragment {
 
         if(arg != null) {
             int idIten = arg.getInt("id");
-            int i = arg.getInt("idArq");
-            if (i != -1) {
-                binding.excluir.setVisibility(View.GONE);
-                binding.atualiza.setVisibility(View.GONE);
-                iten = retornaIten(i, idIten);
-            } else {
-                iten = db.itenListaDao().Busca(idIten);
-            }
+            iten = db.itenListaDao().Busca(idIten);
 
             binding.estabelecimento.setText(iten.getEstabelecimento());
             binding.funcao.setText(iten.getFuncao());
@@ -97,41 +90,6 @@ public class Iten extends Fragment {
                 })
                 .setNegativeButton("Não", null)
                 .show();
-    }
-
-    public ItenLista retornaIten(int i,int posicion){
-        List<ItenLista> itenListaLista = new ArrayList<>();
-        File dir = new File(requireContext().getFilesDir(), "backups");
-        File[] arquivos = dir.listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return name.endsWith(".json");
-            }
-        });
-        assert arquivos != null;
-        File meuArquivo = arquivos[i];
-        try {
-            FileReader reader = new FileReader(meuArquivo);
-            Gson gson = new Gson();
-            BackupMensal backupMensal = gson.fromJson(reader,BackupMensal.class);
-            reader.close();
-
-            List<String> estab = backupMensal.getEstabelecimento();
-            List<String> func = backupMensal.getFuncao();
-            List<Float> valor = backupMensal.getValor();
-
-            if (estab.size() == func.size() && func.size() == valor.size()) {
-                for (int j = 0; j < estab.size(); j++) {
-                    itenListaLista.add(new ItenLista(estab.get(j), func.get(j), valor.get(j)));
-                }
-            } else {
-                Toast.makeText(requireContext(), "Erro nos dados do backup", Toast.LENGTH_SHORT).show();
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-        return itenListaLista.get(posicion);
     }
 
     @Override
