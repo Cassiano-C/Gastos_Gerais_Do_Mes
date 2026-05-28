@@ -47,19 +47,29 @@ Aqui você pode conferir a interface do usuário e o modelo de relatório gerado
     <td align="center"><b>Tela Inicial</b></td>
     <td align="center"><b>Cria Listas</b></td>
     <td align="center"><b>Tela Inicial Com Lista Criada</b></td>
-    <td align="center"><b>Cria itens</b></td>
-    <td align="center"><b>Tela Inicial Com Itens na Lista</b></td>
-    <td align="center"><b>Lista dos Itens</b></td>
   </tr>
   <tr>
     <td><img src="Imagens/home.jpg" width="220" alt="Tela Inicial"></td>
     <td><img src="Imagens/cria_lista.jpg" width="220" alt="Cria Listas"></td>
     <td><img src="Imagens/home_com_lista.jpg" width="220" alt="Tela Inicial Com Lista Criada"></td>
-    <td><img src="Imagens/cira_item.jpg" width="220" alt="Cria itens"></td>
-    <td><img src="Imagens/home_com_itens.jpg" width="220" alt="Tela Inicial Com Itens na Lista"></td>
-    <td><img src="Imagens/lista_itens.jpg" width="220" alt="Lista dos Itens"></td>
   </tr>
 </table>
+
+---
+
+<table align="center">
+    <tr>
+        <td align="center"><b>Cria itens</b></td>
+        <td align="center"><b>Tela Inicial Com Itens na Lista</b></td>
+        <td align="center"><b>Lista dos Itens</b></td>
+    </tr>
+     <tr>
+        <td><img src="Imagens/cira_item.jpg" width="220" alt="Cria itens"></td>
+        <td><img src="Imagens/home_com_itens.jpg" width="220" alt="Tela Inicial Com Itens na Lista"></td>
+        <td><img src="Imagens/lista_itens.jpg" width="220" alt="Lista dos Itens"></td>
+    </tr>
+</table>
+
 
 ---
 
