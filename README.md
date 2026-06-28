@@ -3,7 +3,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Vers%C3%A3o-2.0.1-blue?style=for-the-badge&logo=android" alt="Versão 2.0.1">
   <img src="https://img.shields.io/badge/Autor-Cassiano%20Carvalho-orange?style=for-the-badge" alt="Autor Cassiano">
-  <img src="https://img.shields.io/badge/Status-Conclu%C3%ADdo-brightgreen?style=for-the-badge" alt="Status Concluído">
+  <img src="https://img.shields.io/badge/Status-Conclu%C3%ADdo-brightgreen?style=for-the-badge" alt="Status Em Andamento">
 </p>
 
 ## 📝 O que é o Aplicativo?
@@ -75,9 +75,6 @@ Aqui você pode conferir a interface do usuário e o modelo de relatório gerado
 
 ## 🛠️ Tecnologias Utilizadas
 
-* **Plataforma:** Android
-* **Formato de Distribuição:** APK (Disponível na aba de Releases)
-* **Mecanismo de PDF:** Biblioteca nativa de renderização e estruturação de documentos para impressão.
 
 ---
 
@@ -90,11 +87,3 @@ Este projeto foi idealizado e construído de ponta a ponta por:
 ---
 
 ## 📦 Como instalar o app via GitHub?
-
-Como este aplicativo está hospedado aqui no GitHub, siga estes passos para instalar no seu celular:
-
-1. Acesse a seção de **Releases** no lado direito desta página.
-2. Baixe o arquivo `.apk` da versão mais recente (`2.0.1`).
-3. No seu celular Android, abra o arquivo baixado.
-4. Se o sistema solicitar, ative a permissão para **"Instalar aplicativos de fontes desconhecidas"**.
-5. Siga as instruções na tela e abra o app!
